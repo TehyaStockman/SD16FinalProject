@@ -3,12 +3,24 @@ import argparse
 import cv2
 
 
+# apparently this is needed for the trackbars
+def nothing(x):
+	pass
+
+
 # define the range of colors we want to track~!!!!
 colorLow = (29,86,6)
 colorHigh = (64,255,255)
 
 # referencing the webcam for our video camera
-camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture(1)
+cv2.namedWindow('image')
+cv2.createTrackbar('LowR','image',0,255,nothing)
+cv2.createTrackbar('LowG','image',0,255,nothing)
+cv2.createTrackbar('LowB','image',0,255,nothing)
+cv2.createTrackbar('R','image',0,255,nothing)
+cv2.createTrackbar('G','image',0,255,nothing)
+cv2.createTrackbar('B','image',0,255,nothing)
 
 while 1:
 	# ret is boolean for successful frame read
@@ -48,5 +60,12 @@ while 1:
 	key = cv2.waitKey(1) & 0xFF
 	if key == ord('q'):
 		break
+	if key == ord('w'):
+		cv2.destroyWindow('image')
+	# trakcs the trackbar position and sets colors accordingly
+	if key == ord('c'):
+		colorLow = (cv2.getTrackbarPos('LowB','image'),cv2.getTrackbarPos('LowG','image'),cv2.getTrackbarPos('LowR','image'))
+		colorHigh = (cv2.getTrackbarPos('B','image'),cv2.getTrackbarPos('G','image'),cv2.getTrackbarPos('R','image'))
+
 camera.release()
 cv2.destroyAllWindows()
