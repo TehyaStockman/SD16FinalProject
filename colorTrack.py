@@ -23,14 +23,30 @@ while 1:
 	mask = cv2.dilate(mask, None, iterations=2)
 
 	# finds the contour in the mask an initializes the storage for ball location
-	cnts = cvs.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+	cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 	center = None
 
 	if len(cnts) > 0:
-		# finds the biggest contour and then makes a circle to 
-		# fit around it
-
+		# finds the biggest contour and then finds the smallest circle 
+		# possible to enclose it
 		c = max(cnts, key=cv2.contourArea)
 		((x, y), radius) = cv2.minEnclosingCircle(c)
+
+		# finds the center of the circle using moments
 		M = cv2.moments(c)
 		center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+
+		# ensures the thing it's detecting is not too small and a mistake
+		if radius > 1:
+			# draws a circle around our tracked thing. This is mostly for testing to see how 
+			# this ends up working
+			cv2.circle(frame, (int(x),int(y)), int(radius),(0,0,0),2)
+
+	# displays the screen 
+	cv2.imshow('Frame',frame)
+	# if we press q key, everything quits
+	key = cv2.waitKey(1) & 0xFF
+	if key == ord('q'):
+		break
+camera.release()
+cv2.destroyAllWindows()
