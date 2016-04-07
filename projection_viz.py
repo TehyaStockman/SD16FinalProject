@@ -7,9 +7,15 @@ class Model(object):
 	'''The model class will contain functions of interactions between the different classes,
 	how the different Creatures and Schools interact with wach other and respond to outside 
 	stimuli.'''
-	def __init__(self, screen_size, forceConstant = 10):
+
+
+	def __init__(self, screen_size, creatureNum = 2, forceConstant = 10):
+		self.creature_list = []
 		color = pygame.Color('green')
-		self.creature = Creature(100, 100, 5, 5, color)
+		self.creatureNum = creatureNum
+
+		for i in xrange(creatureNum):
+			self.creature_list.append(Creature(i*10, i*10, 5, 5, color))
 		self.forceConstant = forceConstant
 		#self.mouse_pos = Controller.mouse_pos
 
@@ -32,12 +38,12 @@ class Model(object):
 		creature2.vy -= yForce
 
 	def update(self):
-		for creature1 in creature_list:
-			for creature2 in creature_list:
+		for creature1 in self.creature_list:
+			for creature2 in self.creature_list:
 				if not creature1 is creature2:
 					self.forces(creature1, creature2)
-
-		self.creature.update()
+		for creature in self.creature_list:
+			creature.update()
 
 class School(object):
 	def __init__(self, x, y, vx, vy, r):
@@ -87,14 +93,16 @@ class View(object):
 	'''The View class is the visual representation of the model.'''
 	def __init__(self, screen_size, model):
 		self.screen = pygame.display.set_mode(screen_size)
-		self.screen.fill(pygame.Color('blue')) 
-		pygame.draw.circle(self.screen, model.creature.color, (model.creature.x, model.creature.y), model.creature.r)
+		self.screen.fill(pygame.Color('blue'))
+		for creature in model.creature_list: 
+			pygame.draw.circle(self.screen, creature.color, (creature.x, creature.y), creature.r)
 
 		pygame.display.update()
 
 	def update(self, model):
 		self.screen.fill(pygame.Color('blue'))
-		pygame.draw.circle(self.screen, model.creature.color, (model.creature.x, model.creature.y), model.creature.r)
+		for creature in model.creature_list: 
+			pygame.draw.circle(self.screen, creature.color, (creature.x, creature.y), creature.r)
 		pygame.display.update()
 
 
