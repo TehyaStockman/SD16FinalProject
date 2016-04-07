@@ -13,7 +13,7 @@ class Model(object):
 		self.creature2 = Creature(500, 100, 5, 5, color)
 		#self.mouse_pos = Controller.mouse_pos
 
-	def forces(self, creature, user):
+	def forces(self, creature1, user):
 		pass
 		# dx, dy = creature.x - mouse_pos[0], creature.y - mouse_pos[1]
 		# distance = math.sqrt(dx**2 + dy**2)
@@ -32,6 +32,7 @@ class School(object):
 		self.boundary = 2 * math.pi * r**2  #current boundary of the school is a circle. I don't think this should be a very strict boundary
 		creature_positions = []
 		self.creature_list = []
+
 
 	def update(self):
 		pass
