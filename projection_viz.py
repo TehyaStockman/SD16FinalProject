@@ -7,18 +7,36 @@ class Model(object):
 	'''The model class will contain functions of interactions between the different classes,
 	how the different Creatures and Schools interact with wach other and respond to outside 
 	stimuli.'''
-	def __init__(self, screen_size):
+	def __init__(self, screen_size, forceConstant = 10):
 		color = pygame.Color('green')
 		self.creature = Creature(100, 100, 5, 5, color)
+		self.forceConstant = forceConstant
 		#self.mouse_pos = Controller.mouse_pos
 
-	def forces(self, creature, user):
-		pass
-		# dx, dy = creature.x - mouse_pos[0], creature.y - mouse_pos[1]
-		# distance = math.sqrt(dx**2 + dy**2)
-		# force = creature
+	def forces(self, creature1, creature2):
+		# the distance vectore between the two fish. Vector from creature1 to creature 2
+		xdist = creature1.x - creature2.x
+		ydist = creature1.y - creature2.y
+
+		xForce = creature1.mass * creature2.mass / xdist * self.forceConstant
+		yForce = creature1.mass * creature2.mass / ydist * self.forceConstant
+
+		if math.sqrt(xdist**2 + ydist**2) < max([creature1.repulsion_r, creature2.repulsion_r]):
+			xForce *= -1
+			yForce *= -1
+
+		creature1.vx += xForce
+		creature1.vy += yForce
+
+		creature2.vx -= xForce
+		creature2.vy -= yForce
 
 	def update(self):
+		for creature1 in creature_list:
+			for creature2 in creature_list:
+				if not creature1 is creature2:
+					self.forces(creature1, creature2)
+
 		self.creature.update()
 
 class School(object):
@@ -35,7 +53,7 @@ class School(object):
 		pass
 
 
-class Creature(object):
+class Creature(pygame.sprite.Sprite):
 	def __init__(self, x, y, vx, vy, color, mass = 20, r = 20):
 		'''Creatures are currently represented by dots. Each creature belongs to a school. 
 		A creature can attract and repel other creatures of a school. There are different 
@@ -51,6 +69,7 @@ class Creature(object):
 		self.repulsion_weight = 0.7
 		#self.rect = pygame.Rect(x-r/math.sqrt(2), y-r/math.sqrt(2), 2*r/math.sqrt(2), 2*r/math.sqrt(2))
 
+		pygame.sprite.Sprite.__init__(self)
 	def accelerate(self, force, force_angle):
 		self.vx += force*math.cos(force_angle)
 		self.vy += force*math.sin(force_angle)
