@@ -15,10 +15,12 @@
 * Matplotlib
 * Argparse
 * OpenCV
-### Download Instructions 
+
+### Download Instructions
 * Download the zip file from [our website](http://rachelyang02.github.io/SD16FinalProject/)
 * Unzip the file into a location of your choice
-### 
+
+
 
 
 ##License
