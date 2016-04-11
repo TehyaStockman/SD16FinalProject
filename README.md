@@ -7,8 +7,8 @@
 
 ## Downloading and Installation
 ### Dependencies:
-*Numpyy
-*Scipy
+*.Numpyy
+*.Scipy
 *alsaaudio 
 *Audioop
 *Pygame
