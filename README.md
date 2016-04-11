@@ -17,7 +17,7 @@ Prior to running our program, these packages need to be installed:
 * Argparse
 * OpenCV
 
-### Downloading and Instillation
+### Downloading and Installation
 * Download the zip file from [our website](http://rachelyang02.github.io/SD16FinalProject/)
 * Unzip the file into a location of your choice
 
