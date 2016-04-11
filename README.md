@@ -7,17 +7,17 @@
 
 ## Downloading and Installation
 ### Dependencies:
-*. Numpyy
-*. Scipy
+* Numpyy
+* Scipy
 * alsaaudio 
-*Audioop
-*Pygame
-*Matplotlib
-*Argparse
-*OpenCV
+* Audioop
+* Pygame
+* Matplotlib
+* Argparse
+* OpenCV
 ### Download Instructions 
-*Download the zip file from [our website](http://rachelyang02.github.io/SD16FinalProject/)
-*Unzip the file into a location of your choice
+* Download the zip file from [our website](http://rachelyang02.github.io/SD16FinalProject/)
+* Unzip the file into a location of your choice
 ### 
 
 
