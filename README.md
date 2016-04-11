@@ -7,9 +7,9 @@
 
 ## Downloading and Installation
 ### Dependencies:
-*.Numpyy
-*.Scipy
-*alsaaudio 
+*. Numpyy
+*. Scipy
+* alsaaudio 
 *Audioop
 *Pygame
 *Matplotlib
