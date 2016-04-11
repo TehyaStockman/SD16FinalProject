@@ -22,7 +22,7 @@ Prior to running our program, these packages need to be installed:
 * Unzip the file into a location of your choice
 
 ### How to Use
-*
+Set up a projector on a blank wall in a dark room. Angle the projector so that a person can stand between the projector and the wall without casting a shadow. Have the viewer wear a bright green beanie that is easily trackable so that our program can easily find their location.  Aim a camera at the projection making sure that the person is easily visible in the frame. Before running, change the video camera index in colortrack.py.
 
 
 
