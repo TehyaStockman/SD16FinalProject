@@ -1,6 +1,8 @@
 import sys, os, random, math
 import pygame
 from pygame.locals import *
+import numpy as np
+import scipy
 
 
 class Model(object):
@@ -9,33 +11,51 @@ class Model(object):
 	stimuli.'''
 
 
-	def __init__(self, screen_size, creatureNum = 2, forceConstant = 10):
+	def __init__(self, screen_size, creatureNum = 10, forceConstant = 10):
 		self.creature_list = []
 		color = pygame.Color('green')
 		self.creatureNum = creatureNum
 
 		for i in xrange(creatureNum):
-			self.creature_list.append(Creature(i*10, i*10, 5, 5, color))
+			vx = random.randint(0,1)
+			vy = random.randint(0,1)
+			self.creature_list.append(Creature(i*30, i*30, vx, vy, color))
 		self.forceConstant = forceConstant
+		self.school = School
 		#self.mouse_pos = Controller.mouse_pos
 
 	def forces(self, creature1, creature2):
-		# the distance vectore between the two fish. Vector from creature1 to creature 2
+		# the distanc.e vectore between the two fish. Vector from creature1 to creature 2
 		xdist = creature1.x - creature2.x
 		ydist = creature1.y - creature2.y
+		displacement = math.sqrt(xdist**2 + ydist**2)
 
-		xForce = creature1.mass * creature2.mass / xdist * self.forceConstant
-		yForce = creature1.mass * creature2.mass / ydist * self.forceConstant
 
-		if math.sqrt(xdist**2 + ydist**2) < max([creature1.repulsion_r, creature2.repulsion_r]):
+		if xdist == 0 or ydist == 0:                #cannot divide by zero
+			xdist = 0.0001
+			ydist = 0.0001
+		xForce = creature1.mass * creature2.mass / ((xdist) * self.forceConstant)
+		yForce = creature1.mass * creature2.mass / ((ydist) * self.forceConstant)
+
+		if displacement < max([creature1.repulsion_r, creature2.repulsion_r]) and displacement > min([creature1.orientation_r, creature2.orientation_r]):
+			xForce = 0
+			yForce = 0
+
+		if displacement < max([creature1.orientation_r, creature2.orientation_r]):
+			#force reverses if goes below this range
 			xForce *= -1
 			yForce *= -1
 
-		creature1.vx += xForce
-		creature1.vy += yForce
+		creature1.vx -= int(xForce)
+		creature1.vy -= int(yForce)
 
-		creature2.vx -= xForce
-		creature2.vy -= yForce
+		creature2.vx += int(xForce)
+		creature2.vy += int(yForce)
+
+	def school_force(self, creature1, school):
+
+		xdist = creature1.x - school.x
+		ydist = creature1.y - school.y
 
 	def update(self):
 		for creature1 in self.creature_list:
@@ -51,9 +71,10 @@ class School(object):
 		repel the other creatures in their school.'''
 		self.x, self.y, self.r = x, y, r
 		self.vx, self.vy = vx, vy
+		self.mass = 50
 		self.boundary = 2 * math.pi * r**2  #current boundary of the school is a circle. I don't think this should be a very strict boundary
 		creature_positions = []
-		self.creature_list = []
+		self.creature_list = model.creature_list
 
 	def update(self):
 		pass
@@ -68,9 +89,9 @@ class Creature(pygame.sprite.Sprite):
 		self.vx, self.vy = vx, vy
 		self.color = color
 
-		self.attraction_r = self.r + 10  #numbers for these are not final and will most likely be changed
-		self.orientation_r = self.r + 8
-		self.repulsion_r = self.r + 6
+		self.attraction_r = self.r + 30  #numbers for these are not final and will most likely be changed
+		self.orientation_r = self.r + 30
+		self.repulsion_r = self.r + 5
 		self.attraction_weight = 1.5   #weights will be used in calculating angular direction
 		self.repulsion_weight = 0.7
 		#self.rect = pygame.Rect(x-r/math.sqrt(2), y-r/math.sqrt(2), 2*r/math.sqrt(2), 2*r/math.sqrt(2))
@@ -131,7 +152,7 @@ class Video(object):
 def main():
 	pygame.init()
 	clock = pygame.time.Clock()
-	screen_size = (640, 480) #pygame.display.list_modes()[0]
+	screen_size = (1920, 1080) #pygame.display.list_modes()[0]
 	model = Model(screen_size)
 	controller = Controller()
 	view = View(screen_size, model)
@@ -140,7 +161,7 @@ def main():
 	while running:
 		model.update()
 		view.update(model)
-		clock.tick(60)
+		clock.tick(20)
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				pygame.quit()
