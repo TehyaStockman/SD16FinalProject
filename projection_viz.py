@@ -12,9 +12,7 @@ class Model(object):
 	how the different Creatures and Schools interact with wach other and respond to outside 
 	stimuli.'''
 
-
-
-	def __init__(self, screen_size, tracker, creatureNum = 10, forceConstant = 80):
+	def __init__(self, screen_size, tracker, creatureNum = 50, forceConstant = 80):
 		self.creature_list = []
 		color = pygame.Color('green')
 		self.creatureNum = creatureNum
@@ -31,7 +29,7 @@ class Model(object):
 		#self.mouse_pos = Controller.mouse_pos
 
 	def forces(self, creature1, creature2):
-		# the distanc.e vectore between the two fish. Vector from creature1 to creature 2
+		'''the distanc.e vectore between the two fish. Vector from creature1 to creature 2'''
 		xdist = creature1.x - creature2.x
 		ydist = creature1.y - creature2.y
 		displacement = math.sqrt(xdist**2 + ydist**2)
@@ -116,7 +114,6 @@ class Model(object):
 
 
 
-
 class School(object):
 	def __init__(self, x = 1920/2, y = 1080/2, vx = 0, vy = 0, r = 100):
 		'''A school is made up of many creatures. Each of the creatures both attract and 
@@ -133,7 +130,7 @@ class School(object):
 
 
 class Creature(pygame.sprite.Sprite):
-	def __init__(self, x, y, vx, vy, color, mass = 20, r = 20):
+	def __init__(self, x, y, vx, vy, color, mass = 5, r = 20):
 		'''Creatures are currently represented by dots. Each creature belongs to a school. 
 		A creature can attract and repel other creatures of a school. There are different 
 		radii and magnitudes for attraction, repulsion, and orientation.'''
@@ -158,8 +155,14 @@ class Creature(pygame.sprite.Sprite):
 		#self.rect.centerx, self.rect.centery = self.x, self.y
 
 	def move(self):
-		self.x += self.vx
-		self.y += self.vy
+		if self.vx > 5:
+			self.x += 5
+		if self.vy > 5:
+			self.y += 5
+		else:
+			self.x += self.vx
+			self.y += self.vy
+
 
 
 class View(object):
