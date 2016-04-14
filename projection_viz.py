@@ -3,6 +3,8 @@ import pygame
 from pygame.locals import *
 import numpy as np
 import scipy
+from colorTrack import Tracker
+from threading import Thread
 
 
 class Model(object):
@@ -11,15 +13,16 @@ class Model(object):
 	stimuli.'''
 
 
-	def __init__(self, screen_size, creatureNum = 10, forceConstant = 10):
+	def __init__(self, screen_size, tracker, creatureNum = 10, forceConstant = 80):
 		self.creature_list = []
 		color = pygame.Color('green')
 		self.creatureNum = creatureNum
+		self.tracker = tracker
 
 		for i in xrange(creatureNum):
 			vx = random.randint(0,1)
 			vy = random.randint(0,1)
-			self.creature_list.append(Creature(i*30, i*30, vx, vy, color))
+			self.creature_list.append(Creature(i*30+500, i*30+500, vx, vy, color))
 		self.forceConstant = forceConstant
 		self.school = School
 		#self.mouse_pos = Controller.mouse_pos
@@ -57,11 +60,36 @@ class Model(object):
 		xdist = creature1.x - school.x
 		ydist = creature1.y - school.y
 
+
+	def tracker_force(self, creature):
+	#The force between the tracked object and a fishy
+
+		xlocation = self.tracker.center[0]
+		ylocation = self.tracker.center[1]
+
+		xdist = creature.x - xlocation
+		ydist = creature.y - ylocation
+		displacement = math.sqrt(xdist**2 + ydist**2)
+
+
+		if xdist == 0 or ydist == 0:                #cannot divide by zero
+			xdist = 0.0001
+			ydist = 0.0001
+		xForce = creature.mass  / ((xdist) * 1000)
+		yForce = creature.mass  / ((ydist) * 1000)
+
+		
+
+		creature.vx -= int(xForce)
+		creature.vy -= int(yForce)
+
+
 	def update(self):
 		for creature1 in self.creature_list:
 			for creature2 in self.creature_list:
 				if not creature1 is creature2:
 					self.forces(creature1, creature2)
+			self.tracker_force(creature1)
 		for creature in self.creature_list:
 			creature.update()
 
@@ -153,21 +181,36 @@ def main():
 	pygame.init()
 	clock = pygame.time.Clock()
 	screen_size = (1920, 1080) #pygame.display.list_modes()[0]
-	model = Model(screen_size)
+	
+	# initializes the color tracker and has it run the tracking function
+	tracka = Tracker()
+
+
+
+	# initialize our model
+	model = Model(screen_size, tracka)
+	
 	controller = Controller()
 	view = View(screen_size, model)
 	running = True
-	i = 0
-	while running:
-		model.update()
-		view.update(model)
-		clock.tick(20)
-		for event in pygame.event.get():
-			if event.type == QUIT:
-				pygame.quit()
-				sys.exit()
 
-		i += 1
+
+	def runLoop():
+		while running:
+			tracka.track
+			model.update()
+			view.update(model)
+			clock.tick(20)
+			for event in pygame.event.get():
+				if event.type == QUIT:
+					pygame.quit()
+					sys.exit()
+
+	t1 = Thread(target = tracka.track)
+	t2 = Thread(target = runLoop)
+
+	t1.start()
+	t2.start()
 
 if __name__ == '__main__': main()
 
