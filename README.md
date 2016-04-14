@@ -1,6 +1,6 @@
 # SD16FinalProject
 
-#Interactive Projected Art
+#Project Echo: Interactive Projected Art
 
 ##Description
 This code is for an interactive art display in which viewers can affect and impact what is being displayed by changing their location and making a variation of noises.  This occurs through location detection, captured through OpenCV and a webcam, and audio detection, captured through a microphone, both of which causes the images on the projection to alter right in front of their eyes.
