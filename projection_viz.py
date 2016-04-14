@@ -165,18 +165,37 @@ class Creature(pygame.sprite.Sprite):
 class View(object):
 	'''The View class is the visual representation of the model.'''
 	def __init__(self, screen_size, model):
-		self.screen = pygame.display.set_mode(screen_size)
-		self.screen.fill(pygame.Color('blue'))
-		for creature in model.creature_list: 
-			pygame.draw.circle(self.screen, creature.color, (creature.x, creature.y), creature.r)
+		# set screen size to bigger display--allow more space for school to move
+		self.screen = pygame.display.set_mode((1920,1080))
 
-		pygame.display.update()
+		# need to blit two different versions of the background image
+		self.back1 = pygame.image.load('back.png')
+		self.back2 = pygame.image.load('back.png')
+
+		# initial positions of two images are either 0 or width of first image
+		self.back1_x = 0
+		self.back2_x = self.back1.get_width()
 
 	def update(self, model):
-		self.screen.fill(pygame.Color('blue'))
+		# display images to screen
+		self.screen.blit(self.back1, (self.back1_x,0))
+		self.screen.blit(self.back2, (self.back2_x,0))
+
+		# add school to image
 		for creature in model.creature_list: 
 			pygame.draw.circle(self.screen, creature.color, (creature.x, creature.y), creature.r)
+		
 		pygame.display.update()
+
+		# update image positions to create "animated" feel
+		self.back1_x -= 1
+		self.back2_x -= 1
+
+		# allows images to stream continuously
+		if self.back1_x == -1 * self.back1.get_width():
+			self.back1_x = self.back2_x + self.back2.get_width()
+		if self.back2_x == -1 * self.back2.get_width():
+			self.back2_x = self.back1_x + self.back1.get_width()
 
 
 class Controller(object):
