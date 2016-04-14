@@ -11,17 +11,18 @@ class Model(object):
 	stimuli.'''
 
 
-	def __init__(self, screen_size, creatureNum = 10, forceConstant = 10):
+	def __init__(self, screen_size, creatureNum = 10, forceConstant = 100):
 		self.creature_list = []
 		color = pygame.Color('green')
 		self.creatureNum = creatureNum
+		self.screen_size = screen_size
 
 		for i in xrange(creatureNum):
 			vx = random.randint(0,1)
 			vy = random.randint(0,1)
 			self.creature_list.append(Creature(i*30, i*30, vx, vy, color))
 		self.forceConstant = forceConstant
-		self.school = School
+		self.school = School()
 		#self.mouse_pos = Controller.mouse_pos
 
 	def forces(self, creature1, creature2):
@@ -53,28 +54,47 @@ class Model(object):
 		creature2.vy += int(yForce)
 
 	def school_force(self, creature1, school):
+		#the school has a center which the fish follow
 
 		xdist = creature1.x - school.x
 		ydist = creature1.y - school.y
+		if xdist == 0 or ydist == 0:
+			xdist = 0.0001
+			ydist = 0.0001
+
+		xForce = creature1.mass * school.mass/ ((xdist)*self.forceConstant*10)
+		yForce = creature1.mass * school.mass/ ((ydist)*self.forceConstant*10)
+
+		creature1.vx -= int(xForce)
+		creature1.vy -= int(yForce)
+
 
 	def update(self):
 		for creature1 in self.creature_list:
+			self.school_force(creature1, self.school)
 			for creature2 in self.creature_list:
 				if not creature1 is creature2:
 					self.forces(creature1, creature2)
+			if creature1.x <= 0 or creature1.x >= self.screen_size[0] + 10 or creature1.y <= 0 or creature1.y >= self.screen_size[1] + 10:
+				creature1.vx *= -1
+				creature1.vy *= -1
+
 		for creature in self.creature_list:
 			creature.update()
 
+
+
+
 class School(object):
-	def __init__(self, x, y, vx, vy, r):
+	def __init__(self, x = 1920/2, y = 1080/2, vx = 0, vy = 0, r = 100):
 		'''A school is made up of many creatures. Each of the creatures both attract and 
 		repel the other creatures in their school.'''
 		self.x, self.y, self.r = x, y, r
 		self.vx, self.vy = vx, vy
-		self.mass = 50
+		self.mass = 100
 		self.boundary = 2 * math.pi * r**2  #current boundary of the school is a circle. I don't think this should be a very strict boundary
 		creature_positions = []
-		self.creature_list = model.creature_list
+		#self.creature_list = model.creature_list
 
 	def update(self):
 		pass
@@ -154,6 +174,7 @@ def main():
 	clock = pygame.time.Clock()
 	screen_size = (1920, 1080) #pygame.display.list_modes()[0]
 	model = Model(screen_size)
+	world_size = (2120, 1280)
 	controller = Controller()
 	view = View(screen_size, model)
 	running = True
