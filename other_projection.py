@@ -3,8 +3,6 @@ import pygame
 from pygame.locals import *
 import numpy as np
 import scipy
-from colorTrack import Tracker
-from threading import Thread
 
 
 class Model(object):
@@ -12,24 +10,23 @@ class Model(object):
 	how the different Creatures and Schools interact with wach other and respond to outside 
 	stimuli.'''
 
-	def __init__(self, screen_size, tracker, creatureNum = 10, forceConstant = 100):
+
+	def __init__(self, screen_size, creatureNum = 10, forceConstant = 100):
 		self.creature_list = []
 		color = pygame.Color('green')
 		self.creatureNum = creatureNum
-		self.tracker = tracker
 		self.screen_size = screen_size
-
 
 		for i in xrange(creatureNum):
 			vx = random.randint(0,1)
 			vy = random.randint(0,1)
-			self.creature_list.append(Creature(i*30+300, i*30+300, vx, vy, color))
+			self.creature_list.append(Creature(i*30, i*30, vx, vy, color))
 		self.forceConstant = forceConstant
 		self.school = School()
 		#self.mouse_pos = Controller.mouse_pos
 
 	def forces(self, creature1, creature2):
-		'''the distance vectore between the two fish. Vector from creature1 to creature 2'''
+		# the distanc.e vectore between the two fish. Vector from creature1 to creature 2
 		xdist = creature1.x - creature2.x
 		ydist = creature1.y - creature2.y
 		displacement = math.sqrt(xdist**2 + ydist**2)
@@ -72,47 +69,19 @@ class Model(object):
 		creature1.vy -= int(yForce)
 
 
-
-	def tracker_force(self, creature):
-	#The force between the tracked object and a fishy
-
-		xlocation = self.tracker.center[0]  
-		ylocation = self.tracker.center[1]
-
-		xdist = creature.x - xlocation
-		ydist = creature.y - ylocation
-		displacement = math.sqrt(xdist**2 + ydist**2)
-
-
-		if xdist == 0 or ydist == 0:                #cannot divide by zero
-			xdist = 0.0001
-			ydist = 0.0001
-		xForce = creature.mass  / ((xdist) * 1000)
-		yForce = creature.mass  / ((ydist) * 1000)
-
-		
-
-		creature.vx -= int(xForce)
-		creature.vy -= int(yForce)
-
-
 	def update(self):
 		for creature1 in self.creature_list:
 			self.school_force(creature1, self.school)
 			for creature2 in self.creature_list:
 				if not creature1 is creature2:
 					self.forces(creature1, creature2)
-
-			if creature1.x <= 0 or creature1.x >= self.screen_size[0] + 10:
+			if creature1.x <= 0 or creature1.x >= self.screen_size[0] + 10 or creature1.y <= 0 or creature1.y >= self.screen_size[1] + 10:
 				creature1.vx *= -1
-			if creature1.y <= 0 or creature1.y >= self.screen_size[1] + 10:
 				creature1.vy *= -1
-
-			self.tracker_force(creature1)
 
 		for creature in self.creature_list:
 			creature.update()
-		self.school.update
+
 
 
 
@@ -128,15 +97,11 @@ class School(object):
 		#self.creature_list = model.creature_list
 
 	def update(self):
-		self.move()
-
-	def move(self):
-		self.x += vx
-		self.y += vy
+		pass
 
 
 class Creature(pygame.sprite.Sprite):
-	def __init__(self, x, y, vx, vy, color, mass = 5, r = 20):
+	def __init__(self, x, y, vx, vy, color, mass = 20, r = 20):
 		'''Creatures are currently represented by dots. Each creature belongs to a school. 
 		A creature can attract and repel other creatures of a school. There are different 
 		radii and magnitudes for attraction, repulsion, and orientation.'''
@@ -161,50 +126,25 @@ class Creature(pygame.sprite.Sprite):
 		#self.rect.centerx, self.rect.centery = self.x, self.y
 
 	def move(self):
-		if self.vx > 5:
-			self.x += 5
-		if self.vy > 5:
-			self.y += 5
-		else:
-			self.x += self.vx
-			self.y += self.vy
-
+		self.x += self.vx
+		self.y += self.vy
 
 
 class View(object):
 	'''The View class is the visual representation of the model.'''
 	def __init__(self, screen_size, model):
-		# set screen size to bigger display--allow more space for school to move
-		self.screen = pygame.display.set_mode((1920,1080))
-
-		# need to blit two different versions of the background image
-		self.back1 = pygame.image.load('back.png')
-		self.back2 = pygame.image.load('back.png')
-
-		# initial positions of two images are either 0 or width of first image
-		self.back1_x = 0
-		self.back2_x = self.back1.get_width()
-
-	def update(self, model):
-		# display images to screen
-		self.screen.blit(self.back1, (self.back1_x,0))
-		self.screen.blit(self.back2, (self.back2_x,0))
-
-		# add school to image
+		self.screen = pygame.display.set_mode(screen_size)
+		self.screen.fill(pygame.Color('blue'))
 		for creature in model.creature_list: 
 			pygame.draw.circle(self.screen, creature.color, (creature.x, creature.y), creature.r)
-		
+
 		pygame.display.update()
 
-		# update image positions to create "animated" feel
-		self.back1_x -= 1
-		self.back2_x -= 1
-
-		# allows images to stream continuously
-		if self.back1_x == -1 * self.back1.get_width():
-			self.back1_x = self.back2_x + self.back2.get_width()
-		if self.back2_x == -1 * self.back2.get_width():
-			self.back2_x = self.back1_x + self.back1.get_width()
+	def update(self, model):
+		self.screen.fill(pygame.Color('blue'))
+		for creature in model.creature_list: 
+			pygame.draw.circle(self.screen, creature.color, (creature.x, creature.y), creature.r)
+		pygame.display.update()
 
 
 class Controller(object):
@@ -233,35 +173,22 @@ def main():
 	pygame.init()
 	clock = pygame.time.Clock()
 	screen_size = (1920, 1080) #pygame.display.list_modes()[0]
+	model = Model(screen_size)
 	world_size = (2120, 1280)
-	# initializes the color tracker and has it run the tracking function
-	tracka = Tracker()
-
-	# initialize our model
-	model = Model(screen_size, tracka)
-	
-
 	controller = Controller()
 	view = View(screen_size, model)
 	running = True
+	i = 0
+	while running:
+		model.update()
+		view.update(model)
+		clock.tick(20)
+		for event in pygame.event.get():
+			if event.type == QUIT:
+				pygame.quit()
+				sys.exit()
 
-
-	def runLoop():
-		while running:
-			tracka.track
-			model.update()
-			view.update(model)
-			clock.tick(20)
-			for event in pygame.event.get():
-				if event.type == QUIT:
-					pygame.quit()
-					sys.exit()
-
-	t1 = Thread(target = tracka.track)
-	t2 = Thread(target = runLoop)
-
-	t1.start()
-	t2.start()
+		i += 1
 
 if __name__ == '__main__': main()
 
