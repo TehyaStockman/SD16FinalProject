@@ -12,7 +12,7 @@ class Model(object):
 	how the different Creatures and Schools interact with wach other and respond to outside 
 	stimuli.'''
 
-	def __init__(self, screen_size, tracker, creatureNum = 10, forceConstant = 100):
+	def __init__(self, screen_size, tracker, creatureNum = 5, forceConstant = 100):
 		self.creature_list = []
 		color = pygame.Color('green')
 		self.creatureNum = creatureNum
@@ -90,28 +90,31 @@ class Model(object):
 		xForce = creature.mass  / ((xdist) * 1000)
 		yForce = creature.mass  / ((ydist) * 1000)
 
-		
 
 		creature.vx -= int(xForce)
 		creature.vy -= int(yForce)
 
+	def __str__(self):
+		return '{}, {}'.format(self.tracker.center[0], self.tracker.center[1])
+
 
 	def update(self):
 		for creature1 in self.creature_list:
-			self.school_force(creature1, self.school)
+			#self.school_force(creature1, self.school)
 			for creature2 in self.creature_list:
 				if not creature1 is creature2:
 					self.forces(creature1, creature2)
-
-			if creature1.x <= 0 or creature1.x >= self.screen_size[0] + 10:
+			if creature1.x <= 0 or creature1.x >= self.screen_size[0]:
 				creature1.vx *= -1
-			if creature1.y <= 0 or creature1.y >= self.screen_size[1] + 10:
+			if creature1.y <= 0 or creature1.y >= self.screen_size[1]:
 				creature1.vy *= -1
 
-			self.tracker_force(creature1)
+			#self.tracker_force(creature1)
 
 		for creature in self.creature_list:
+			print creature
 			creature.update()
+		print self.school
 		self.school.update
 
 
@@ -133,6 +136,9 @@ class School(object):
 	def move(self):
 		self.x += vx
 		self.y += vy
+
+	def __str__(self):
+		return 'school position {}, {}'.format(self.x, self.y)
 
 
 class Creature(pygame.sprite.Sprite):
@@ -168,6 +174,9 @@ class Creature(pygame.sprite.Sprite):
 		else:
 			self.x += self.vx
 			self.y += self.vy
+
+	def __str__(self):
+		return 'creature position {},{}, {}, {}'.format(self.x, self.y, self.vx, self.vy)
 
 
 
