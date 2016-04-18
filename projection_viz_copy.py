@@ -13,11 +13,13 @@ class Model(object):
 		self.creature2 = Creature(500, 100, 5, 5, color)
 		#self.mouse_pos = Controller.mouse_pos
 
-	def forces(self, creature1, user):
+	def forces(self, creature1, creature2):
 		pass
-		# dx, dy = creature.x - mouse_pos[0], creature.y - mouse_pos[1]
-		# distance = math.sqrt(dx**2 + dy**2)
-		# force = creature
+		dx, dy = creature1.x - creature2.x, creature1.y - creature2.y
+		distance = math.sqrt(dx**2 + dy**2)
+		force = creature1.mass*creature2.mass/(distance**2)
+		force_x = 
+		force_y = 
 
 	def update(self):
 		self.creature1.update()
@@ -65,6 +67,9 @@ class Creature(object):
 	def move(self):
 		self.x += self.vx
 		self.y += self.vy
+
+	def __str__(self):
+		return 'creature position {},{}'.format(self.x, self.y)
 
 
 class View(object):
