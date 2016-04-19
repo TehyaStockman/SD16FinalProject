@@ -35,38 +35,47 @@ class Model(object):
 		displacement = math.sqrt(xdist**2 + ydist**2)
 
 
-		if xdist == 0 or ydist == 0:                #cannot divide by zero
-			xdist = 0.0001
-			ydist = 0.0001
-		xForce = creature1.mass * creature2.mass / ((xdist) * self.forceConstant)
-		yForce = creature1.mass * creature2.mass / ((ydist) * self.forceConstant)
+		if displacement == 0:                #cannot divide by zero
+			displacement = 0.0001
+		force = creature1.mass * creature2.mass / (displacement **2)
 
+		#attraction force zone
+		xForce = (xdist/displacement)*force
+		yForce = (ydist/displacement)*force
+
+		#orientation zone
 		if displacement < max([creature1.repulsion_r, creature2.repulsion_r]) and displacement > min([creature1.orientation_r, creature2.orientation_r]):
-			xForce = 0
-			yForce = 0
+			#averages the velocities of the creatures so that they move in the same direction
+			xForce = (creature1.vx + creature2.vx)/2
+			yForce = (creature1.vy + creature2.vy)/2
 
+
+		#repulsion force zone
 		if displacement < max([creature1.orientation_r, creature2.orientation_r]):
 			#force reverses if goes below this range
 			xForce *= -1
 			yForce *= -1
 
+		#update the velocities
 		creature1.vx -= int(xForce)
 		creature1.vy -= int(yForce)
 
 		creature2.vx += int(xForce)
 		creature2.vy += int(yForce)
 
+
 	def school_force(self, creature1, school):
 		#the school has a center which the fish follow
 
 		xdist = creature1.x - school.x
 		ydist = creature1.y - school.y
-		if xdist == 0 or ydist == 0:
-			xdist = 0.0001
-			ydist = 0.0001
+		displacement = math.sqrt(xdist**2 + ydist**2)
+		if displacement == 0:
+			displacement == 0.0001
 
-		xForce = creature1.mass * school.mass/ ((xdist)*self.forceConstant*10)
-		yForce = creature1.mass * school.mass/ ((ydist)*self.forceConstant*10)
+		force = creature1.mass * school.mass/ (displacement**2)
+		xForce = (xdist/displacement)*force
+		yForce = (ydist/displacement)*force
 
 		creature1.vx -= int(xForce)
 		creature1.vy -= int(yForce)
@@ -95,7 +104,7 @@ class Model(object):
 		creature.vy -= int(yForce)
 
 	def __str__(self):
-		return '{}, {}'.format(self.tracker.center[0], self.tracker.center[1])
+		pass
 
 
 	def update(self):
@@ -150,17 +159,17 @@ class Creature(pygame.sprite.Sprite):
 		self.vx, self.vy = vx, vy
 		self.color = color
 
-		self.attraction_r = self.r + 30  #numbers for these are not final and will most likely be changed
-		self.orientation_r = self.r + 30
+		self.attraction_r = self.r + 200  #numbers for these are not final and will most likely be changed
+		self.orientation_r = self.r + 150
 		self.repulsion_r = self.r + 5
 		self.attraction_weight = 1.5   #weights will be used in calculating angular direction
 		self.repulsion_weight = 0.7
 		#self.rect = pygame.Rect(x-r/math.sqrt(2), y-r/math.sqrt(2), 2*r/math.sqrt(2), 2*r/math.sqrt(2))
 
 		pygame.sprite.Sprite.__init__(self)
-	def accelerate(self, force, force_angle):
-		self.vx += force*math.cos(force_angle)
-		self.vy += force*math.sin(force_angle)
+	# def accelerate(self, force, force_angle):
+	# 	self.vx += force*math.cos(force_angle)
+	# 	self.vy += force*math.sin(force_angle)
 
 	def update(self):
 		self.move()
@@ -200,7 +209,9 @@ class View(object):
 		self.screen.blit(self.back2, (self.back2_x,0))
 
 		# add school to image
-		for creature in model.creature_list: 
+		for creature in model.creature_list:
+			pygame.draw.circle(self.screen, pygame.Color('red'), (creature.x, creature.y), creature.attraction_r)
+			pygame.draw.circle(self.screen, pygame.Color('blue'), (creature.x, creature.y), creature.orientation_r) 
 			pygame.draw.circle(self.screen, creature.color, (creature.x, creature.y), creature.r)
 		
 		pygame.display.update()
