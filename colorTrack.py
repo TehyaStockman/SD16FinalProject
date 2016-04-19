@@ -21,6 +21,7 @@ class Tracker(object):
 		# referencing the webcam for our video camera
 		self.camera = cv2.VideoCapture(0)
 
+
 		#The following is useful for color calibration
 		# cv2.namedWindow('image')
 		# cv2.createTrackbar('LowR','image',0,255,nothing)
