@@ -250,25 +250,32 @@ class Video(object):
 
 
 def main():
+	"""Runs our game loop and our tracking loop"""
+
 	pygame.init()
+
+	# initializing the clock to limit the rate our code runs at
 	clock = pygame.time.Clock()
+
+	# What the user can see
 	screen_size = (1920, 1080) #pygame.display.list_modes()[0]
+
+	# boundaries that the creatures have to be within
 	world_size = (2120, 1280)
-	# initializes the color tracker and has it run the tracking function
+	
+	# initializes the color tracker
 	tracka = Tracker()
 
 	# initialize our model
 	model = Model(screen_size, tracka)
 	
-
-	controller = Controller()
+	# this manages how we see things
 	view = View(screen_size, model)
-	running = True
 
-
+	# The game loop is in a seperate funciton so we can thread
 	def runLoop():
+		running = True
 		while running:
-			tracka.track
 			model.update()
 			view.update(model)
 			clock.tick(20)
