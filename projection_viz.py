@@ -21,15 +21,15 @@ class Model(object):
 
 
 		for i in xrange(creatureNum):
-			vx = random.randint(0,1)
-			vy = random.randint(0,1)
+			vx = random.randint(0,3)
+			vy = random.randint(0,3)
 			self.creature_list.append(Creature(i*30+300, i*30+300, vx, vy, color))
 		self.forceConstant = forceConstant
 		self.school = School()
 		#self.mouse_pos = Controller.mouse_pos
 
 	def forces(self, creature1, creature2):
-		'''the distance vectore between the two fish. Vector from creature1 to creature 2'''
+		'''the distance vectore between the two fish. Vector from creature1 to creature 2  *if elif else add'''
 		xdist = creature1.x - creature2.x
 		ydist = creature1.y - creature2.y
 		displacement = math.sqrt(xdist**2 + ydist**2)
@@ -37,31 +37,32 @@ class Model(object):
 
 		if displacement == 0:                #cannot divide by zero
 			displacement = 0.0001
-		force = creature1.mass * creature2.mass / (displacement **2)
+		force = (displacement)/2500
 
 		#attraction force zone
-		xForce = (xdist/displacement)*force
-		yForce = (ydist/displacement)*force
+		xForce = 100*(xdist/displacement)*force
+		yForce = 100*(ydist/displacement)*force
 
 		#orientation zone
-		if displacement < max([creature1.repulsion_r, creature2.repulsion_r]) and displacement > min([creature1.orientation_r, creature2.orientation_r]):
+		if displacement < (creature1.attraction_r + creature2.attraction_r) and displacement > (creature1.orientation_r + creature2.orientation_r):
 			#averages the velocities of the creatures so that they move in the same direction
 			xForce = (creature1.vx + creature2.vx)/2
 			yForce = (creature1.vy + creature2.vy)/2
 
 
 		#repulsion force zone
-		if displacement < max([creature1.orientation_r, creature2.orientation_r]):
+		if displacement < (creature1.orientation_r + creature2.orientation_r): #and displacement > (creature1.repulsion_r + creature2.repulsion_r):
 			#force reverses if goes below this range
-			xForce *= -1
-			yForce *= -1
+			force = creature1.mass/ (displacement)
+			xForce *= -1 	#(xdist/displacement)*force
+			yForce *= -1 	#(ydist/displacement)*force
 
 		#update the velocities
-		creature1.vx -= int(xForce)
-		creature1.vy -= int(yForce)
+		creature1.vx -= xForce
+		creature1.vy -= yForce
 
-		creature2.vx += int(xForce)
-		creature2.vy += int(yForce)
+		creature2.vx += xForce
+		creature2.vy += yForce
 
 
 	def school_force(self, creature1, school):
@@ -73,7 +74,7 @@ class Model(object):
 		if displacement == 0:
 			displacement == 0.0001
 
-		force = creature1.mass * school.mass/ (displacement**2)
+		force = (displacement)/2000
 		xForce = (xdist/displacement)*force
 		yForce = (ydist/displacement)*force
 
@@ -104,12 +105,12 @@ class Model(object):
 		creature.vy -= int(yForce)
 
 	def __str__(self):
-		pass
+		return "{}"
 
 
 	def update(self):
 		for creature1 in self.creature_list:
-			#self.school_force(creature1, self.school)
+			self.school_force(creature1, self.school)
 			for creature2 in self.creature_list:
 				if not creature1 is creature2:
 					self.forces(creature1, creature2)
@@ -159,8 +160,8 @@ class Creature(pygame.sprite.Sprite):
 		self.vx, self.vy = vx, vy
 		self.color = color
 
-		self.attraction_r = self.r + 200  #numbers for these are not final and will most likely be changed
-		self.orientation_r = self.r + 150
+		self.attraction_r = self.r + 80  #numbers for these are not final and will most likely be changed
+		self.orientation_r = self.r + 30
 		self.repulsion_r = self.r + 5
 		self.attraction_weight = 1.5   #weights will be used in calculating angular direction
 		self.repulsion_weight = 0.7
@@ -210,10 +211,10 @@ class View(object):
 
 		# add school to image
 		for creature in model.creature_list:
-			pygame.draw.circle(self.screen, pygame.Color('red'), (creature.x, creature.y), creature.attraction_r)
-			pygame.draw.circle(self.screen, pygame.Color('blue'), (creature.x, creature.y), creature.orientation_r) 
-			pygame.draw.circle(self.screen, creature.color, (creature.x, creature.y), creature.r)
-		
+			pygame.draw.circle(self.screen, pygame.Color('red'), (int(round(creature.x)), int(round(creature.y))), creature.attraction_r)
+			pygame.draw.circle(self.screen, pygame.Color('blue'), (int(round(creature.x)), int(round(creature.y))), creature.orientation_r) 
+			pygame.draw.circle(self.screen, creature.color, (int(round(creature.x)), int(round(creature.y))), creature.r)
+			pygame.draw.line(self.screen, pygame.Color('white'), (creature.x, creature.y), (creature.x + 20*creature.vx, creature.y + 20*creature.vy), 4)
 		pygame.display.update()
 
 		# update image positions to create "animated" feel
@@ -271,12 +272,11 @@ def main():
 			tracka.track
 			model.update()
 			view.update(model)
-			clock.tick(20)
+			clock.tick(30)
 			for event in pygame.event.get():
-				if event.type == QUIT:
+				if event.type == QUIT or event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
 					pygame.quit()
 					sys.exit()
-
 	t1 = Thread(target = tracka.track)
 	t2 = Thread(target = runLoop)
 
