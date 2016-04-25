@@ -12,7 +12,7 @@ class Model(object):
 	how the different Creatures and Schools interact with wach other and respond to outside 
 	stimuli.'''
 
-	def __init__(self, screen_size, tracker, creatureNum = 5, forceConstant = 100):
+	def __init__(self, screen_size, tracker, creatureNum = 2, forceConstant = 100):
 		self.creature_list = []
 		color = pygame.Color('green')
 		self.creatureNum = creatureNum
@@ -37,7 +37,7 @@ class Model(object):
 
 		if displacement == 0:                #cannot divide by zero
 			displacement = 0.0001
-		force = (displacement)/2500
+		force = creature1.mass*creature2.mass/(displacement)
 
 		#attraction force zone
 		xForce = 100*(xdist/displacement)*force
