@@ -32,15 +32,15 @@ class Model(object):
 		displacement = math.sqrt(xdist**2 + ydist**2)
 
 
-		if xdist == 0 or ydist == 0:                #cannot divide by zero
-			xdist = 0.0001
-			ydist = 0.0001
-		xForce = creature1.mass * creature2.mass / ((xdist) * self.forceConstant)
-		yForce = creature1.mass * creature2.mass / ((ydist) * self.forceConstant)
+		if displacement == 0:                #cannot divide by zero
+			displacement = 0.0001
+			#ydist = 0.0001
+		xForce = (xdist/displacement)*creature1.mass * creature2.mass*(displacement)/(self.forceConstant)
+		yForce = (ydist/displacement)*creature1.mass * creature2.mass*(displacement)/(self.forceConstant)
 
 		if displacement < max([creature1.repulsion_r, creature2.repulsion_r]) and displacement > min([creature1.orientation_r, creature2.orientation_r]):
-			xForce = 0
-			yForce = 0
+			xForce = 0.5*xForce
+			yForce = 0.5*yForce
 
 		if displacement < max([creature1.orientation_r, creature2.orientation_r]):
 			#force reverses if goes below this range
@@ -58,12 +58,15 @@ class Model(object):
 
 		xdist = creature1.x - school.x
 		ydist = creature1.y - school.y
-		if xdist == 0 or ydist == 0:
+		displacement = math.sqrt(xdist**2 + ydist**2)
+
+		if xdist == 0: 
 			xdist = 0.0001
+		if ydist == 0:
 			ydist = 0.0001
 
-		xForce = creature1.mass * school.mass/ ((xdist)*self.forceConstant*10)
-		yForce = creature1.mass * school.mass/ ((ydist)*self.forceConstant*10)
+		xForce = creature1.mass * school.mass/ (xdist*self.forceConstant*10)
+		yForce = creature1.mass * school.mass/ (ydist*self.forceConstant*10)
 
 		creature1.vx -= int(xForce)
 		creature1.vy -= int(yForce)
@@ -71,16 +74,28 @@ class Model(object):
 
 	def update(self):
 		for creature1 in self.creature_list:
-			self.school_force(creature1, self.school)
+			#self.school_force(creature1, self.school)
 			for creature2 in self.creature_list:
 				if not creature1 is creature2:
 					self.forces(creature1, creature2)
-			if creature1.x <= 0 or creature1.x >= self.screen_size[0] + 10 or creature1.y <= 0 or creature1.y >= self.screen_size[1] + 10:
+			if creature1.x <= 0 or creature1.x >= self.screen_size[0] + 10:
 				creature1.vx *= -1
+			if creature1.y <= 0 or creature1.y >= self.screen_size[1] + 10:
 				creature1.vy *= -1
+			if creature1.vx > 10:
+				creature1.vx *= 0.4
+			if creature1.vy > 10:
+				creature1.vy *= 0.4
+			creature1.vx = int(round(creature1.vx))
+			creature1.vy = int(round(creature1.vy))
+		if self.school.x <= 0 or self.school.x >= self.screen_size[0]: 
+			self.school.vx *= -1
+		if self.school.y <= 0 or self.school.y >= self.screen_size[1]:
+			self.school.vy *= -1
 
 		for creature in self.creature_list:
 			creature.update()
+		self.school.update()
 
 
 
@@ -97,7 +112,8 @@ class School(object):
 		#self.creature_list = model.creature_list
 
 	def update(self):
-		pass
+		self.x += random.randint(-50,30)
+		self.y += random.randint(-50,30)
 
 
 class Creature(pygame.sprite.Sprite):
@@ -135,6 +151,7 @@ class View(object):
 	def __init__(self, screen_size, model):
 		self.screen = pygame.display.set_mode(screen_size)
 		self.screen.fill(pygame.Color('blue'))
+		self.school = model.school
 		for creature in model.creature_list: 
 			pygame.draw.circle(self.screen, creature.color, (creature.x, creature.y), creature.r)
 
@@ -144,6 +161,8 @@ class View(object):
 		self.screen.fill(pygame.Color('blue'))
 		for creature in model.creature_list: 
 			pygame.draw.circle(self.screen, creature.color, (creature.x, creature.y), creature.r)
+			pygame.draw.circle(self.screen, pygame.Color('red'), (self.school.x, self.school.y), self.school.r)
+			pygame.draw.line(self.screen, pygame.Color('white'), (creature.x, creature.y), (creature.x + 20*creature.vx, creature.y + 20*creature.vy), 4)
 		pygame.display.update()
 
 
